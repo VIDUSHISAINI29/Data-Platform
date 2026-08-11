@@ -32,9 +32,9 @@
 </script>
 
 <template>
-   <div class="tw-flex tw-min-h-screen lg:tw-flex-row tw-justify-center tw-flex-col tw-bg-pulse-bg">
+   <div class="tw-flex tw-min-h-screen lg:tw-flex-row tw-justify-center tw-flex-col">
       <!-- <AppHeader /> -->
-      <AppSidebar class="lg:tw-flex tw-hidden" />
+      <!-- <AppSidebar class="lg:tw-flex tw-hidden" /> -->
       <main class="tw-flex-1 tw-max-w-[1500px] tw-justify-center tw-overflow-auto">
          <router-view />
       </main>
