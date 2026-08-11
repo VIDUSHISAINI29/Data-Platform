@@ -1,0 +1,80 @@
+import { createRouter, createWebHistory } from 'vue-router';
+import { useAuthStore } from '@/modules/auth/store/auth.store';
+
+const router = createRouter({
+   history: createWebHistory(import.meta.env.BASE_URL),
+   routes: [
+      // {
+      //    path: '/sign-in',
+      //    name: 'signIn',
+      //    component: () => import('@/modules/auth/pages/SignInPage.vue'),
+      //    meta: { public: true },
+      // },
+      {
+         path: '/',
+         redirect: 'home',
+      },
+
+      {
+         path: '/',
+         component: () => import('@/layout/AppLayout.vue'),
+         children: [
+           
+            {
+               path: 'projects',
+               name: 'projects',
+               component: () =>
+                  import('@/modules/projects/pages/ProjectsPage.vue'),
+               children: [
+                  {
+                     path: ':projectId',
+                     name: 'project-details',
+                     component: () =>
+                        import('@/modules/projects/pages/ProjectDetailsPage.vue'),
+                     props: true,
+                  },
+               ],
+            },
+            {
+               path: '/home',
+               name: 'home',
+               component: () => import('@/modules/home/pages/HomePage.vue')
+            },
+         ],
+      },
+
+      {
+         path: '/:pathMatch(.*)*',
+         name: 'notfound',
+         component: () => import('@/app/NotFound.vue'),
+      },
+   ],
+});
+
+/* ===============================
+   Navigation Guard
+=============================== */
+
+router.beforeEach(async (to) => {
+   const auth = useAuthStore();
+
+   // Always re-fetch session on protected routes to catch expiry.
+   // On public routes, only fetch if not yet initialized.
+   if (to.meta.requiresAuth) {
+      await auth.fetchSession();
+   } else if (!auth.initialized) {
+      await auth.fetchSession();
+   }
+
+   const isAuthenticated = !!auth.user;
+
+   if (to.meta.requiresAuth && !isAuthenticated) {
+      return { name: 'signIn', query: { redirect: to.fullPath } };
+   }
+
+   if (to.meta.public && isAuthenticated) {
+      return { name: 'dashboard' };
+   }
+});
+
+export default router;

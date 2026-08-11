@@ -1,0 +1,22 @@
+{
+   "compilerOptions": {
+      "target": "ESNext",
+      "module": "ESNext",
+      "moduleResolution": "Bundler",
+      "strict": true,
+      "jsx": "preserve",
+      "sourceMap": true,
+      "resolveJsonModule": true,
+      "esModuleInterop": true,
+      "lib": ["ESNext", "DOM"],
+      "types": ["vite/client", "node"],
+      "skipLibCheck": true,
+      "baseUrl": ".",
+      "paths": {
+         "@/*": ["src/*"]
+      },
+      "noEmit": true
+   },
+   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
+   "references": [{ "path": "./tsconfig.node.json" }]
+}
