@@ -29,7 +29,7 @@ Sentry.init({
 });
 
 const auth = useAuthStore();
-await auth.fetchSession();
+// await auth.fetchSession();
 
 app.use(router);
 setupPrimeVue(app);

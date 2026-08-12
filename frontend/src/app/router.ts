@@ -55,26 +55,26 @@ const router = createRouter({
    Navigation Guard
 =============================== */
 
-router.beforeEach(async (to) => {
-   const auth = useAuthStore();
+// router.beforeEach(async (to) => {
+//    const auth = useAuthStore();
 
-   // Always re-fetch session on protected routes to catch expiry.
-   // On public routes, only fetch if not yet initialized.
-   if (to.meta.requiresAuth) {
-      await auth.fetchSession();
-   } else if (!auth.initialized) {
-      await auth.fetchSession();
-   }
+//    // Always re-fetch session on protected routes to catch expiry.
+//    // On public routes, only fetch if not yet initialized.
+//    if (to.meta.requiresAuth) {
+//       await auth.fetchSession();
+//    } else if (!auth.initialized) {
+//       await auth.fetchSession();
+//    }
 
-   const isAuthenticated = !!auth.user;
+//    const isAuthenticated = !!auth.user;
 
-   if (to.meta.requiresAuth && !isAuthenticated) {
-      return { name: 'signIn', query: { redirect: to.fullPath } };
-   }
+//    if (to.meta.requiresAuth && !isAuthenticated) {
+//       return { name: 'signIn', query: { redirect: to.fullPath } };
+//    }
 
-   if (to.meta.public && isAuthenticated) {
-      return { name: 'dashboard' };
-   }
-});
+//    if (to.meta.public && isAuthenticated) {
+//       return { name: 'dashboard' };
+//    }
+// });
 
 export default router;

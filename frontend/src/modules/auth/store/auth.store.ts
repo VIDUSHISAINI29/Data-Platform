@@ -13,29 +13,29 @@ export const useAuthStore = defineStore('auth', () => {
       user.value = newUser;
    };
 
-   const fetchSession = async () => {
-      try {
-         // First verify the session is valid via Better Auth
-         const { data } = await authClient.getSession();
+   // const fetchSession = async () => {
+   //    try {
+   //       // First verify the session is valid via Better Auth
+   //       const { data } = await authClient.getSession();
 
-         if (!data?.user) {
-            user.value = null;
-            return;
-         }
+   //       if (!data?.user) {
+   //          user.value = null;
+   //          return;
+   //       }
 
-         // Session is valid — fetch the full profile from users table
-         // which always has the latest name, avatar, bio, socials
-         const { data: profile } = await api.get('/users/me');
-         user.value = {
-            ...data.user, // keeps id, email, emailVerified from session
-            ...profile, // overwrites name, image/avatar with users table values
-         };
-      } catch {
-         user.value = null;
-      } finally {
-         initialized.value = true;
-      }
-   };
+   //       // Session is valid — fetch the full profile from users table
+   //       // which always has the latest name, avatar, bio, socials
+   //       const { data: profile } = await api.get('/users/me');
+   //       user.value = {
+   //          ...data.user, // keeps id, email, emailVerified from session
+   //          ...profile, // overwrites name, image/avatar with users table values
+   //       };
+   //    } catch {
+   //       user.value = null;
+   //    } finally {
+   //       initialized.value = true;
+   //    }
+   // };
 
    const logout = async (router: any) => {
       await authClient.signOut();
@@ -48,7 +48,7 @@ export const useAuthStore = defineStore('auth', () => {
       loading,
       initialized,
       setUser,
-      fetchSession,
+      // fetchSession,
       logout
    };
 });
