@@ -12,7 +12,7 @@ const router = createRouter({
       // },
       {
          path: '/',
-         redirect: 'home',
+         redirect: 'upload-file',
       },
 
       {
@@ -36,9 +36,9 @@ const router = createRouter({
                ],
             },
             {
-               path: '/home',
-               name: 'home',
-               component: () => import('@/modules/home/pages/HomePage.vue')
+               path: '/upload-file',
+               name: 'uploadFile',
+               component: () => import('@/modules/uploadFile/pages/UploadFilePage.vue')
             },
          ],
       },

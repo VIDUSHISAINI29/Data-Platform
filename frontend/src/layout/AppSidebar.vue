@@ -3,21 +3,17 @@ import { useRoute } from 'vue-router';
 
 const menuItems = [
     {
-        name: 'Dashboard',
-        icon: 'pi-wave-pulse',
-        routes: ['/dashboard'],
+        name: 'Upload File',
+        icon: 'pi-cloud-upload',
+        routes: ['/upload-file'],
     },
     {
-        name: 'Projects',
+        name: 'Transform',
         icon: 'pi-folder',
         routes: ['/projects', '/project/'],
     },
 ];
-const projects = [
-    { name: 'Afterread Api', icon: 'A', iconBg: 'tw-bg-pulse-blue' },
-    { name: 'Global Connect Api', icon: 'G', iconBg: 'tw-bg-pulse-green' },
-    { name: 'Hanger Api', icon: 'H', iconBg: 'tw-bg-pulse-purple' }
-];
+
 const route = useRoute();
 const isActive = (item: typeof menuItems[number]) => {
     return item.routes.some(path => route.path.startsWith(path));
@@ -25,17 +21,18 @@ const isActive = (item: typeof menuItems[number]) => {
 </script>
 <template>
 <div class=" tw-w-full tw-flex tw-p-2 tw-flex-col tw-max-w-52">
-    <div class=" tw-border-b-[1px]">
-        <img class="tw-w-40 tw-p-1" src="/images/logo.png" alt="">
+    <div class=" tw-border-b-[1px] tw-flex tw-justify-center tw-items-center">
+        <!-- <img class="tw-w-40 tw-p-1" src="/images/logo.png" alt=""> -->
+         <span class="tw-text-blue-600 tw-text-2xl tw-pb-2 tw-font-bold">Data-Platform</span>
     </div>
-    <div class="tw-flex tw-flex-col tw-py-5 tw-text-gray-300 tw-border-b-[1px] tw-text-sm tw-gap-2">
+    <div class="tw-flex tw-flex-col tw-py-3 tw-text-blue-600  tw-border-b-[1px] tw-text-sm tw-gap-2">
        <div
   v-for="(menuItem, index) in menuItems"
   :key="index"
   :class="[
-    'tw-py-2 tw-px-4 tw-transition-colors tw-duration-300 tw-cursor-pointer tw-rounded-md tw-flex tw-items-center tw-gap-2',
+    'tw-py-2 tw-px-4 tw-transition-colors hover:tw-bg-blue-100 tw-duration-300 tw-cursor-pointer tw-rounded-md tw-flex tw-items-center tw-gap-2',
     isActive(menuItem)
-      ? 'tw-bg-gradient-to-r tw-from-pulse-cyan/50 tw-via-pulse-lime/30 tw-to-transparent'
+      ? 'tw-bg-blue-600 tw-text-white'
       : ''
   ]"
   @click="$router.push(menuItem.routes[0])"
@@ -44,7 +41,7 @@ const isActive = (item: typeof menuItems[number]) => {
     :class="[
       menuItem.icon,
       'pi tw-text-sm tw-duration-300 tw-transition-colors',
-      isActive(menuItem) ? 'tw-text-pulse-cyan' : ''
+      isActive(menuItem) ? 'tw-text-white' : ' tw-text-blue-600'
     ]"
   ></i>
 
