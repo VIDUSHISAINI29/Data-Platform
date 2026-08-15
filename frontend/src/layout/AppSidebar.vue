@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router';
-
+import axios, { all } from 'axios'
+import { ref, onMounted } from 'vue';
 const menuItems = [
     {
         name: 'Upload File',
@@ -10,14 +11,39 @@ const menuItems = [
     {
         name: 'Transform',
         icon: 'pi-folder',
-        routes: ['/projects', '/project/'],
+        routes: ['/transform'],
     },
 ];
+
+const VITE_BACKEND_URL = import.meta.env.VITE_API_URL
+const allFilesList = ref<File | null>(null)
+
+const get_files_list = async() => {
+    try {
+        let response = await axios.get(`${VITE_BACKEND_URL}/reads/read-files`)
+        allFilesList.value = response?.data?.files;
+        console.log('files = ', allFilesList.value)
+    } catch (error: any) {
+    if (error.response) {
+      console.error('Server Error Data:', error.response.data)
+      console.error('Server Status:', error.response.status)
+
+      console.log('error -',error.response || 'Something went wrong while reading the file.')
+        
+    } else {
+      console.error('Read failed:', error.message)
+    }
+  }
+}
 
 const route = useRoute();
 const isActive = (item: typeof menuItems[number]) => {
     return item.routes.some(path => route.path.startsWith(path));
 };
+
+onMounted(async() => {
+     await get_files_list()
+})
 </script>
 <template>
 <div class=" tw-w-full tw-flex tw-p-2 tw-flex-col tw-max-w-52">
@@ -32,7 +58,7 @@ const isActive = (item: typeof menuItems[number]) => {
   :class="[
     'tw-py-2 tw-px-4 tw-transition-colors hover:tw-bg-blue-100 tw-duration-300 tw-cursor-pointer tw-rounded-md tw-flex tw-items-center tw-gap-2',
     isActive(menuItem)
-      ? 'tw-bg-blue-600 tw-text-white'
+      ? 'tw-bg-blue-600 tw-text-white hover:tw-bg-blue-600'
       : ''
   ]"
   @click="$router.push(menuItem.routes[0])"
@@ -45,9 +71,15 @@ const isActive = (item: typeof menuItems[number]) => {
     ]"
   ></i>
 
-  <span class="tw-font-semibold">
+ <div>
+     <span class="tw-font-semibold">
     {{ menuItem.name }}
   </span>
+  <span v-if="allFilesList" v-for="(file, index) in allFilesList">
+    {{ file }}
+  </span>
+ </div>
+  
 </div>
     </div>
     <!-- <div class="tw-flex tw-flex-col tw-py-4 tw-text-gray-300 tw-border-b-[1px] tw-text-sm tw-gap-2">

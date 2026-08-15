@@ -6,6 +6,7 @@ const selectedFile = ref<File | null>(null)
 const isUploading = ref(false)
 const uploadSuccess = ref(false)
 const uploadError = ref('')
+const VITE_BACKEND_URL = import.meta.env.VITE_API_URL
 
 const handleFileUpload = (event: Event) => {
   const input = event.target as HTMLInputElement
@@ -54,7 +55,7 @@ const uploadFile = async () => {
 
   try {
     const response = await axios.post(
-      'http://127.0.0.1:8000/api/v1/uploads/upload-file',
+      `${VITE_BACKEND_URL}/uploads/upload-file`,
       formData,
       {
         headers: {

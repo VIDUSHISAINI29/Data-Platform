@@ -21,10 +21,10 @@ const router = createRouter({
          children: [
            
             {
-               path: 'projects',
-               name: 'projects',
+               path: 'transform',
+               name: 'transform',
                component: () =>
-                  import('@/modules/projects/pages/ProjectsPage.vue'),
+                  import('@/modules/transform/pages/TransformPage.vue'),
                children: [
                   {
                      path: ':projectId',
