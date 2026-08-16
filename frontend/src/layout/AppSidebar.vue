@@ -17,7 +17,8 @@
 
    const VITE_BACKEND_URL = import.meta.env.VITE_API_URL;
    const allFilesList = ref<File | null>(null);
-   const showFiles = ref(false)
+   const selectedFile = ref<string | null>(null);
+   const showFiles = ref(false);
 
    const get_files_list = async () => {
       try {
@@ -44,8 +45,13 @@
       return item.routes.some((path) => route.path.startsWith(path));
    };
    const isTransformActive = computed(() => {
-  return route.path === '/transform';
-});
+      return route.path === '/transform';
+   });
+
+   const selectFile = (file_name: string) => {
+      selectedFile.value = file_name;
+      console.log('selected-file', typeof(selectedFile.value))
+   };
 
    onMounted(async () => {
       await get_files_list();
@@ -73,36 +79,48 @@
                      ? 'tw-bg-blue-600 tw-text-white hover:tw-bg-blue-600'
                      : '',
                ]">
-             <div class="tw-flex tw-gap-2 tw-items-center">
+               <div class="tw-flex tw-items-center tw-gap-2">
                   <i
-                  :class="[
-                     menuItem.icon,
-                     'pi tw-text-sm tw-transition-colors tw-duration-300',
-                     isActive(menuItem) ? 'tw-text-white' : 'tw-text-blue-600',
-                  ]"></i>
-               <span class="tw-font-semibold">
-                  {{ menuItem.name }}
-               </span>
-             </div>
-              <div>
-                 <i v-if="menuItem.name === 'Transform'"
-                  :class="[
-                     menuItem.icon,
-                     'pi tw-text-sm tw-transition-colors tw-duration-300',
-                     isActive(menuItem) ? 'tw-text-white pi-angle-down' : 'tw-text-blue-600 pi-angle-right',
-                  ]"></i>
-              </div>
+                     :class="[
+                        menuItem.icon,
+                        'pi tw-text-sm tw-transition-colors tw-duration-300',
+                        isActive(menuItem)
+                           ? 'tw-text-white'
+                           : 'tw-text-blue-600',
+                     ]"></i>
+                  <span class="tw-font-semibold">
+                     {{ menuItem.name }}
+                  </span>
+               </div>
+               <div>
+                  <i
+                     v-if="menuItem.name === 'Transform'"
+                     :class="[
+                        menuItem.icon,
+                        'pi tw-text-sm tw-transition-colors tw-duration-300',
+                        isActive(menuItem)
+                           ? 'pi-angle-down tw-text-white'
+                           : 'pi-angle-right tw-text-blue-600',
+                     ]"></i>
+               </div>
             </div>
-            <div v-if="allFilesList && isTransformActive && menuItem.name === 'Transform'"
-                     v-for="(file, index) in allFilesList" class="flex tw-flex-col tw-py-2 tw-my-2 tw-bg-blue-100 tw-rounded-md">
-               <div class="tw-flex tw-cursor-pointer tw-flex-col tw-items-center tw-pl-3">
-                  <div class="tw-flex tw-gap-2 tw-items-center">
-                    <i class="pi pi-arrow-right tw-pt-1 tw-text-[10px] tw-font-light"></i>
-                    <span
-                     >
+            <div
+              
+               v-if="
+                  allFilesList &&
+                  isTransformActive &&
+                  menuItem.name === 'Transform'
+               "
+               v-for="(file, index) in allFilesList"
+                
+               :class="['flex tw-my-1 tw-cursor-pointer tw-flex-col tw-rounded-md  tw-py-2 tw-transition-colors tw-duration-300 hover:tw-bg-blue-200', selectedFile == file ? 'tw-bg-blue-200' : 'tw-bg-blue-50']">
+               <div @click="selectFile(file)" class="tw-flex tw-items-center tw-gap-2 tw-pl-3">
+                
+                  <i
+                     class="pi pi-arrow-right tw-pt-1 tw-text-[10px] tw-font-light"></i>
+                  <span>
                      {{ file }}
                   </span>
-                  </div>
                </div>
             </div>
          </div>

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
-from src.controllers.readFile import get_list_of_files
+from src.controllers.readFile import get_list_of_files, get_preview_of_file
+
 
 read_file_router = APIRouter()
 
@@ -8,3 +9,9 @@ def read_endpoint():
     files = get_list_of_files()
     print(files)
     return files    
+
+@read_file_router.get('/file-preview/{file_name}')
+def preview_endpoint(file_name:str):
+    file = get_preview_of_file(file_name)
+    print(file)
+    return file    
