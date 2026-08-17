@@ -7,7 +7,6 @@ read_file_router = APIRouter()
 @read_file_router.get('/read-files')
 def read_endpoint():
     files = get_list_of_files()
-    print(files)
     return files    
 
 @read_file_router.get('/file-preview/{file_name}')

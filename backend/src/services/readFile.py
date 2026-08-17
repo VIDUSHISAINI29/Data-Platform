@@ -21,10 +21,20 @@ def list_files():
 
 def fetch_file_from_data_folder(file_name: str):
 
-    file = next((f for f in os.listdir(DATA_DIR) if f == "{file_name}"), None)
-    return {file: file}
-    
+    file_path = os.path.join(DATA_DIR, file_name)
 
+    if not os.path.isfile(file_path):
+        raise HTTPException(
+            status_code=404,
+            detail="File not found"
+        )
+
+    with open(file_path, "rb") as file:
+        file_bytes = file.read()
+
+    extension = file_name.rsplit(".", 1)[-1].lower()
+
+    return file_bytes, extension
 
 
 def process_file_to_df(file_bytes: bytes, extension: str) -> pd.DataFrame:
@@ -38,13 +48,15 @@ def process_file_to_df(file_bytes: bytes, extension: str) -> pd.DataFrame:
             return pd.read_parquet(file_stream)
         elif extension == "xls":
             return pd.read_excel(file_stream)
+        elif extension == "xlsx":
+            return pd.read_excel(file_stream)
         else:
             raise HTTPException(status_code=400, detail="Unsupported file format")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to parse file: {str(e)}")
 
 
-async def get_file_preview(file_name: str):
+def get_file_preview(file_name: str):
     file_bytes, extension = fetch_file_from_data_folder(file_name)
     df = process_file_to_df(file_bytes, extension)
     

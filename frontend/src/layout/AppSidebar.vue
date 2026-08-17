@@ -1,7 +1,10 @@
 <script setup lang="ts">
    import { useRoute } from 'vue-router';
    import axios, { all } from 'axios';
-   import { ref, onMounted, computed } from 'vue';
+   import { ref, onMounted, computed, watchEffect, watch } from 'vue';
+   import { useFileStore } from '@/shared/store/fileStore';
+
+   const fileStore = useFileStore();
    const menuItems = [
       {
          name: 'Upload File',
@@ -20,7 +23,7 @@
    const selectedFile = ref<string | null>(null);
    const showFiles = ref(false);
 
-   const get_files_list = async () => {
+   const getFilesList = async () => {
       try {
          let response = await axios.get(`${VITE_BACKEND_URL}/reads/read-files`);
          allFilesList.value = response?.data?.files;
@@ -48,13 +51,37 @@
       return route.path === '/transform';
    });
 
-   const selectFile = (file_name: string) => {
-      selectedFile.value = file_name;
+   const selectFile = (fileName: string) => {
+      selectedFile.value = fileName;
       console.log('selected-file', typeof(selectedFile.value))
    };
 
+   const getSelectedFilePreview = async() => {
+      try {
+         let response = await axios.get(`${VITE_BACKEND_URL}/reads/file-preview/${selectedFile.value}`);
+         // fileStore.currentFile = response?.data?.file
+         console.log('res - ',response?.data)
+      } catch (error: any) {
+         if (error.response) {
+            console.error('Server Error Data:', error.response.data);
+            console.error('Server Status:', error.response.status);
+
+            console.log(
+               'error -',
+               error.response || 'Something went wrong while reading preview of the file.',
+            );
+         } else {
+            console.error('Preview Read failed:', error.message);
+         }
+      }
+   }
+
+   watch(selectedFile, async() => {
+      await getSelectedFilePreview();
+   })
+
    onMounted(async () => {
-      await get_files_list();
+      await getFilesList();
    });
 </script>
 <template>
@@ -64,7 +91,7 @@
          <span class="tw-pb-2 tw-text-2xl tw-font-bold tw-text-blue-600">
             Data-Platform
          </span>
-      </div>
+      </div>   
       <div
          class="tw-flex tw-flex-col tw-gap-2 tw-border-b-[1px] tw-py-3 tw-text-sm tw-text-blue-600">
          <div
