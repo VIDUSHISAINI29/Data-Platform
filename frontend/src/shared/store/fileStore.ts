@@ -1,8 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
+interface FilePreview {
+  columns: string[]
+  data: Record<string, unknown>[]
+}
+
 export const useFileStore = defineStore('file', () => {
-    const currentFile = ref<File | null>(null)
+    const currentFile = ref<FilePreview | null>(null)
 
     return{
         currentFile

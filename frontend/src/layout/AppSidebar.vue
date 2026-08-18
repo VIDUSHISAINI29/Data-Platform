@@ -59,7 +59,7 @@
    const getSelectedFilePreview = async() => {
       try {
          let response = await axios.get(`${VITE_BACKEND_URL}/reads/file-preview/${selectedFile.value}`);
-         // fileStore.currentFile = response?.data?.file
+         fileStore.currentFile = response?.data
          console.log('res - ',response?.data)
       } catch (error: any) {
          if (error.response) {

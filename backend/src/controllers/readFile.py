@@ -10,12 +10,31 @@ def get_list_of_files():
         raise HTTPException(status_code=500, detail=str(e))
 
 
-def get_preview_of_file(file_name: str):
-    try:
-        file = get_file_preview(file_name)
-        return file
+# def get_preview_of_file(file_name: str):
+#     try:
+#         file = get_file_preview(file_name)
+#         return file
         
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
 
+
+async def get_preview_of_file(
+    file_name: str,
+    limit: int = 100
+):
+    try:
+        return get_file_preview(
+            file_name,
+            limit
+        )
+
+    except HTTPException:
+        raise
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
+        )
 
