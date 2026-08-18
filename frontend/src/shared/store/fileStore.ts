@@ -8,8 +8,10 @@ interface FilePreview {
 
 export const useFileStore = defineStore('file', () => {
     const currentFile = ref<FilePreview | null>(null)
+    const currentFileName = ref<string | null>(null)
 
     return{
-        currentFile
+        currentFile,
+        currentFileName
     }
 })

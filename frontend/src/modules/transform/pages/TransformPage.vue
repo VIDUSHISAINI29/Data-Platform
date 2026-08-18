@@ -1,7 +1,9 @@
 <script setup lang="ts">
    import { ref, onMounted, computed } from 'vue';
    import { useFileStore } from '@/shared/store/fileStore';
+   import axios from 'axios'
 
+   const VITE_BACKEND_URL = import.meta.env.VITE_API_URL;
    const fileStore = useFileStore();
  const rows = computed(() => {
   return fileStore.currentFile?.data ?? []
@@ -9,6 +11,52 @@
   const columns = computed(() => {
   return fileStore.currentFile?.columns ?? []
 })
+
+
+  const query = ref(`
+SELECT *
+FROM data
+LIMIT 2
+`)
+
+const loading = ref(false)
+const error = ref('')
+
+const queryResult = ref<{
+  columns: string[]
+  data: Record<string, any>[]
+} | null>(null)
+
+const runQuery = async () => {
+  if (!query.value.trim()) {
+    return
+  }
+
+  loading.value = true
+  error.value = ''
+
+  try {
+    const response = await axios.post(
+      `${VITE_BACKEND_URL}/query/query-file`,
+      {
+        file_name: fileStore.currentFileName,
+        query: query.value
+      }
+    )
+
+    queryResult.value = response.data
+    fileStore.currentFile = queryResult.value
+    console.log('query result - ', queryResult.value)
+
+  } catch (err: any) {
+    error.value =
+      err.response?.data?.detail ||
+      'Failed to execute query'
+
+  } finally {
+    loading.value = false
+  }
+}
 
    onMounted(() => {
     console.log('row - ',fileStore.currentFile)
@@ -19,7 +67,45 @@
 
 <template>
    <div class="tw-m-1 tw-flex tw-flex-col tw-gap-2 tw-p-2">
-      <div>Transform</div>
+      <div>    <!-- SQL Editor -->
+    <div class="tw-flex tw-flex-col tw-gap-2">
+
+      <div class="tw-flex tw-items-center tw-justify-between">
+        <span class="tw-font-semibold">
+          SQL Query
+        </span>
+
+        <Button
+          label="Run Query"
+          icon="pi pi-play"
+          class="tw-bg-blue-600 tw-border-blue-600"
+          :loading="loading"
+          @click="runQuery"
+        />
+      </div>
+
+      <textarea
+        v-model="query"
+        class="tw-w-full tw-min-h-[220px] tw-rounded-lg tw-border tw-p-4 tw-font-mono tw-text-sm"
+        placeholder="Write your SQL query..."
+        spellcheck="false"
+      />
+
+    </div>
+
+    <!-- Error -->
+    <Message
+      v-if="error"
+      severity="error"
+    >
+      {{ error }}
+    </Message>
+
+    <!-- Result -->
+    <div
+      v-if="0"
+      class="tw-overflow-x-auto"
+    ></div>
       <div>
             <div class="w-full">
                <DataTable  :value="rows" paginator :rows="5" tableStyle="min-width: 50rem">
@@ -27,6 +113,7 @@
                </DataTable>
             </div>
       </div>
+   </div>
    </div>
 </template>
 

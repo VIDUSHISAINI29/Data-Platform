@@ -53,6 +53,7 @@
 
    const selectFile = (fileName: string) => {
       selectedFile.value = fileName;
+      fileStore.currentFileName = fileName;
       console.log('selected-file', typeof(selectedFile.value))
    };
 
@@ -61,6 +62,7 @@
          let response = await axios.get(`${VITE_BACKEND_URL}/reads/file-preview/${selectedFile.value}`);
          fileStore.currentFile = response?.data
          console.log('res - ',response?.data)
+         fileStore.currentFileName = selectedFile.value
       } catch (error: any) {
          if (error.response) {
             console.error('Server Error Data:', error.response.data);
@@ -140,7 +142,7 @@
                "
                v-for="(file, index) in allFilesList"
                 
-               :class="['flex tw-my-1 tw-cursor-pointer tw-flex-col tw-rounded-md  tw-py-2 tw-transition-colors tw-duration-300 hover:tw-bg-blue-200', selectedFile == file ? 'tw-bg-blue-200' : 'tw-bg-blue-50']">
+               :class="['flex tw-my-1 tw-cursor-pointer tw-flex-col tw-rounded-md  tw-py-2 tw-transition-colors tw-duration-300 hover:tw-bg-blue-100', selectedFile == file ? 'tw-bg-blue-200' : 'tw-bg-blue-50']">
                <div @click="selectFile(file)" class="tw-flex tw-items-center tw-gap-2 tw-pl-3">
                 
                   <i
