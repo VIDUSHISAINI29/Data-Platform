@@ -12,6 +12,27 @@
   return fileStore.currentFile?.columns ?? []
 })
 
+const getSelectedFilePreview = async() => {
+      try {
+         let response = await axios.get(`${VITE_BACKEND_URL}/reads/file-preview/${fileStore.currentFileName}`);
+         fileStore.currentFile = response?.data
+         console.log('res - ',response?.data)
+      } catch (error: any) {
+         if (error.response) {
+            console.error('Server Error Data:', error.response.data);
+            console.error('Server Status:', error.response.status);
+
+            console.log(
+               'error -',
+               error.response || 'Something went wrong while reading preview of the file.',
+            );
+         } else {
+            console.error('Preview Read failed:', error.message);
+         }
+      }
+   }
+
+
 
   const query = ref(`
 SELECT *
@@ -47,7 +68,7 @@ const runQuery = async () => {
     queryResult.value = response.data
     fileStore.currentFile = queryResult.value
     console.log('query result - ', queryResult.value)
-
+     await getSelectedFilePreview()
   } catch (err: any) {
     error.value =
       err.response?.data?.detail ||

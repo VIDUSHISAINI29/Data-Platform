@@ -21,19 +21,34 @@ const router = createRouter({
          children: [
            
             {
-               path: 'transform',
-               name: 'transform',
+               path: 'transformed-files',
+               name: 'transformedFiles',
                component: () =>
-                  import('@/modules/transform/pages/TransformPage.vue'),
-               children: [
-                  {
-                     path: ':projectId',
-                     name: 'project-details',
-                     component: () =>
-                        import('@/modules/projects/pages/ProjectDetailsPage.vue'),
-                     props: true,
-                  },
-               ],
+                  import('@/modules/transformedFiles/pages/TransformedFilesPage.vue'),
+               // children: [
+               //    {
+               //       path: ':projectId',
+               //       name: 'project-details',
+               //       component: () =>
+               //          import('@/modules/projects/pages/ProjectDetailsPage.vue'),
+               //       props: true,
+               //    },
+               // ],
+            },
+            {
+               path: '/raw-files',
+               name: 'rawFiles',
+               component: () => import('@/modules/rawFiles/pages/RawFilesPage.vue')
+            },
+            {
+               path: '/upload-file',
+               name: 'uploadFile',
+               component: () => import('@/modules/uploadFile/pages/UploadFilePage.vue')
+            },
+            {
+               path: '/upload-file',
+               name: 'uploadFile',
+               component: () => import('@/modules/uploadFile/pages/UploadFilePage.vue')
             },
             {
                path: '/upload-file',

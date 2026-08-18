@@ -12,22 +12,27 @@
          routes: ['/upload-file'],
       },
       {
-         name: 'Transform',
-         icon: 'pi-folder',
-         routes: ['/transform'],
+         name: 'Raw Files',
+         icon: 'pi-file',
+         routes: ['/raw-files'],
+      },
+      {
+         name: 'Transformed Files',
+         icon: 'pi-file-import',
+         routes: ['/transformed-files'],
       },
    ];
 
    const VITE_BACKEND_URL = import.meta.env.VITE_API_URL;
-   const allFilesList = ref<File | null>(null);
+   const rawFilesList = ref<File | null>(null);
    const selectedFile = ref<string | null>(null);
    const showFiles = ref(false);
 
    const getFilesList = async () => {
       try {
          let response = await axios.get(`${VITE_BACKEND_URL}/reads/read-files`);
-         allFilesList.value = response?.data?.files;
-         console.log('files = ', allFilesList.value);
+         rawFilesList.value = response?.data?.files;
+         console.log('files = ', rawFilesList.value);
       } catch (error: any) {
          if (error.response) {
             console.error('Server Error Data:', error.response.data);
@@ -47,8 +52,8 @@
    const isActive = (item: (typeof menuItems)[number]) => {
       return item.routes.some((path) => route.path.startsWith(path));
    };
-   const isTransformActive = computed(() => {
-      return route.path === '/transform';
+   const isShowDownArrow = computed(() => {
+      return route.path === '/raw-files' || route.path === 'transformed-files';
    });
 
    const selectFile = (fileName: string) => {
@@ -123,7 +128,7 @@
                </div>
                <div>
                   <i
-                     v-if="menuItem.name === 'Transform'"
+                     v-if="menuItem.name === 'Raw Files' || 'Transformed Files'"
                      :class="[
                         menuItem.icon,
                         'pi tw-text-sm tw-transition-colors tw-duration-300',
@@ -136,17 +141,17 @@
             <div
               
                v-if="
-                  allFilesList &&
-                  isTransformActive &&
-                  menuItem.name === 'Transform'
+                  rawFilesList &&
+                  isShowDownArrow &&
+                  (menuItem.name === 'Raw Files')
                "
-               v-for="(file, index) in allFilesList"
-                
+               v-for="(file, index) in rawFilesList"
+               
                :class="['flex tw-my-1 tw-cursor-pointer tw-flex-col tw-rounded-md  tw-py-2 tw-transition-colors tw-duration-300 hover:tw-bg-blue-100', selectedFile == file ? 'tw-bg-blue-200' : 'tw-bg-blue-50']">
                <div @click="selectFile(file)" class="tw-flex tw-items-center tw-gap-2 tw-pl-3">
-                
+                  
                   <i
-                     class="pi pi-arrow-right tw-pt-1 tw-text-[10px] tw-font-light"></i>
+                  class="pi pi-arrow-right tw-pt-1 tw-text-[10px] tw-font-light"></i>
                   <span>
                      {{ file }}
                   </span>

@@ -10,9 +10,16 @@ from src.services.readFile import dataframe_to_preview
 ROOT = Path(__file__).resolve().parent.parent
 
 DATA_DIR = ROOT / "data" / "raw" 
+TRANSFORMED_DIR = ROOT / "data" / "transformed"
+
+TRANSFORMED_DIR.mkdir(parents=True, exist_ok=True)
 
 
-def execute_sql_query(file_name: str, query: str):
+
+def execute_sql_query(
+    file_name: str,
+    query: str
+):
     file_path = DATA_DIR / file_name
 
     if not file_path.exists():
@@ -24,33 +31,68 @@ def execute_sql_query(file_name: str, query: str):
     extension = file_path.suffix.lower()
 
     if extension == ".parquet":
-        source = f"read_parquet('{file_path}')"
+        reader = f"read_parquet('{file_path}')"
 
     elif extension == ".csv":
-        source = f"read_csv_auto('{file_path}')"
+        reader = f"read_csv_auto('{file_path}')"
 
     elif extension == ".json":
-        source = f"read_json_auto('{file_path}')"
+        reader = f"read_json_auto('{file_path}')"
+
+    elif extension == ".xlsx":
+        reader = f"read_xlsx('{file_path}')"
+        
+    elif extension == ".xls":
+        reader = f"read_xlsx('{file_path}')"
 
     else:
         raise HTTPException(
             status_code=400,
-            detail="SQL querying is currently supported for Parquet, CSV and JSON files"
+            detail="Transformation currently supports Parquet, CSV and JSON"
         )
+
+    output_path = (
+        TRANSFORMED_DIR /
+        f"{file_path.stem}_transformed.parquet"
+    )
 
     connection = duckdb.connect()
 
     try:
-        connection.execute(f"""
-            CREATE VIEW data AS 
-                SELECT * FROM {source}
-        """)
 
-        df = connection.execute(query).df()
+        # Load selected file into DuckDB
+        connection.execute(
+            f"""
+            CREATE TABLE data AS
+            SELECT *
+            FROM {reader}
+            """
+        )
 
-        return dataframe_to_preview(df)
+        # Execute user's transformation
+        connection.execute(query)
+
+        # Save transformed table
+        connection.execute(
+            f"""
+            COPY data
+            TO '{output_path}'
+            (FORMAT PARQUET)
+            """
+        )
+
+        return {
+            "message": "File transformed successfully",
+            "file_name": output_path.name,
+            "path": str(output_path)
+        }
+
+    except Exception as e:
+
+        raise HTTPException(
+            status_code=400,
+            detail=f"Transformation failed: {str(e)}"
+        )
 
     finally:
         connection.close()
-    
-
