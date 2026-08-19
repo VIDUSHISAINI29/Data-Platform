@@ -9,9 +9,14 @@ interface FilePreview {
 export const useFileStore = defineStore('file', () => {
     const currentFile = ref<FilePreview | null>(null)
     const currentFileName = ref<string | null>(null)
+    const rawFilesList = ref<string[]>([]);
+    const transformedFilesList = ref<string[]>([]);
+
 
     return{
         currentFile,
-        currentFileName
+        currentFileName,
+        rawFilesList,
+        transformedFilesList
     }
 })

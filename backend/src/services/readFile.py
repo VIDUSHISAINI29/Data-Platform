@@ -8,11 +8,18 @@ from fastapi import HTTPException
 ROOT = Path(__file__).resolve().parent.parent
 
 DATA_DIR = ROOT / "data" / "raw" 
+TRANSFORMED_DATA_DIR = ROOT / "data" / "raw" 
 
-def list_files():
+def list_raw_files():
     """Lists all supported data files in the folder."""
     supported_extensions = (".csv", ".json", ".xlsx", ".xls", ".parquet")
     files = [f for f in os.listdir(DATA_DIR) if f.endswith(supported_extensions)]
+    return {"files": files}
+
+def list_transformed_files():
+    """Lists all supported data files in the folder."""
+    supported_extensions = (".csv", ".json", ".xlsx", ".xls", ".parquet")
+    files = [f for f in os.listdir(TRANSFORMED_DATA_DIR) if f.endswith(supported_extensions)]
     return {"files": files}
 
 

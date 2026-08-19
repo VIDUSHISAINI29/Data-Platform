@@ -1,5 +1,5 @@
 <script setup lang="ts">
-   import { useRoute } from 'vue-router';
+   import { useRoute, useRouter } from 'vue-router';
    import axios, { all } from 'axios';
    import { ref, onMounted, computed, watchEffect, watch } from 'vue';
    import { useFileStore } from '@/shared/store/fileStore';
@@ -24,50 +24,49 @@
    ];
 
    const VITE_BACKEND_URL = import.meta.env.VITE_API_URL;
-   const rawFilesList = ref<File | null>(null);
    const selectedFile = ref<string | null>(null);
    const showFiles = ref(false);
 
-   const getFilesList = async () => {
-      try {
-         let response = await axios.get(`${VITE_BACKEND_URL}/reads/read-files`);
-         rawFilesList.value = response?.data?.files;
-         console.log('files = ', rawFilesList.value);
-      } catch (error: any) {
-         if (error.response) {
-            console.error('Server Error Data:', error.response.data);
-            console.error('Server Status:', error.response.status);
+   // const getFilesList = async () => {
+   //    try {
+   //       let response = await axios.get(`${VITE_BACKEND_URL}/reads/read-files`);
+   //       rawFilesList.value = response?.data?.files;
+   //       console.log('files = ', rawFilesList.value);
+   //    } catch (error: any) {
+   //       if (error.response) {
+   //          console.error('Server Error Data:', error.response.data);
+   //          console.error('Server Status:', error.response.status);
 
-            console.log(
-               'error -',
-               error.response || 'Something went wrong while reading the file.',
-            );
-         } else {
-            console.error('Read failed:', error.message);
-         }
-      }
-   };
+   //          console.log(
+   //             'error -',
+   //             error.response || 'Something went wrong while reading the file.',
+   //          );
+   //       } else {
+   //          console.error('Read failed:', error.message);
+   //       }
+   //    }
+   // };
 
    const route = useRoute();
+   const router = useRouter();
    const isActive = (item: (typeof menuItems)[number]) => {
       return item.routes.some((path) => route.path.startsWith(path));
    };
-   const isShowDownArrow = computed(() => {
-      return route.path === '/raw-files' || route.path === 'transformed-files';
-   });
 
    const selectFile = (fileName: string) => {
       selectedFile.value = fileName;
       fileStore.currentFileName = fileName;
-      console.log('selected-file', typeof(selectedFile.value))
+      // console.log('selected-file', typeof(selectedFile.value))
    };
 
-   const getSelectedFilePreview = async() => {
+   const getSelectedFilePreview = async () => {
       try {
-         let response = await axios.get(`${VITE_BACKEND_URL}/reads/file-preview/${selectedFile.value}`);
-         fileStore.currentFile = response?.data
-         console.log('res - ',response?.data)
-         fileStore.currentFileName = selectedFile.value
+         let response = await axios.get(
+            `${VITE_BACKEND_URL}/reads/file-preview/${selectedFile.value}`,
+         );
+         fileStore.currentFile = response?.data;
+         // console.log('res - ',response?.data)
+         fileStore.currentFileName = selectedFile.value;
       } catch (error: any) {
          if (error.response) {
             console.error('Server Error Data:', error.response.data);
@@ -75,20 +74,50 @@
 
             console.log(
                'error -',
-               error.response || 'Something went wrong while reading preview of the file.',
+               error.response ||
+                  'Something went wrong while reading preview of the file.',
             );
          } else {
             console.error('Preview Read failed:', error.message);
          }
       }
+   };
+
+   const openMenu = ref<string | null>(null);
+
+   const clickMenuItem = (menuItem: any) => {
+      
+      const hasSubMenu =
+         menuItem.name === 'Raw Files' || menuItem.name === 'Transformed Files';
+
+      if (hasSubMenu) {
+         openMenu.value =
+            openMenu.value === menuItem.name ? null : menuItem.name;
+      } else {
+         openMenu.value = null;
+      }
+
+      router.push(menuItem.routes[0]);
+   };
+
+   const getFilesForMenu = (menuName: string) => {
+   if (menuName === 'Raw Files') {
+      return fileStore.rawFilesList
    }
 
-   watch(selectedFile, async() => {
+   if (menuName === 'Transformed Files') {
+      return fileStore.transformedFilesList
+   }
+
+   return []
+}
+
+   watch(selectedFile, async () => {
       await getSelectedFilePreview();
-   })
+   });
 
    onMounted(async () => {
-      await getFilesList();
+      // await getFilesList();
    });
 </script>
 <template>
@@ -98,14 +127,14 @@
          <span class="tw-pb-2 tw-text-2xl tw-font-bold tw-text-blue-600">
             Data-Platform
          </span>
-      </div>   
+      </div>
       <div
          class="tw-flex tw-flex-col tw-gap-2 tw-border-b-[1px] tw-py-3 tw-text-sm tw-text-blue-600">
          <div
             v-for="(menuItem, index) in menuItems"
             :key="index"
             class="tw-flex tw-flex-col tw-justify-center"
-            @click="$router.push(menuItem.routes[0])">
+            @click="clickMenuItem(menuItem)">
             <div
                :class="[
                   'tw-flex tw-cursor-pointer tw-justify-between tw-rounded-md tw-px-4 tw-py-2 tw-transition-colors tw-duration-300 hover:tw-bg-blue-100',
@@ -128,30 +157,35 @@
                </div>
                <div>
                   <i
-                     v-if="menuItem.name === 'Raw Files' || 'Transformed Files'"
+                     v-if="
+                        menuItem.name === 'Raw Files' ||
+                        menuItem.name === 'Transformed Files'
+                     "
                      :class="[
-                        menuItem.icon,
-                        'pi tw-text-sm tw-transition-colors tw-duration-300',
-                        isActive(menuItem)
+                        'pi tw-text-sm  tw-transition-colors tw-duration-300',
+
+                        openMenu === menuItem.name
                            ? 'pi-angle-down tw-text-white'
-                           : 'pi-angle-right tw-text-blue-600',
+                           : 'pi-angle-right ',
                      ]"></i>
                </div>
             </div>
             <div
-              
                v-if="
-                  rawFilesList &&
-                  isShowDownArrow &&
-                  (menuItem.name === 'Raw Files')
+                  fileStore.rawFilesList &&
+                  openMenu === 'Raw Files' &&
+                  menuItem.name === 'Raw Files'
                "
-               v-for="(file, index) in rawFilesList"
-               
-               :class="['flex tw-my-1 tw-cursor-pointer tw-flex-col tw-rounded-md  tw-py-2 tw-transition-colors tw-duration-300 hover:tw-bg-blue-100', selectedFile == file ? 'tw-bg-blue-200' : 'tw-bg-blue-50']">
-               <div @click="selectFile(file)" class="tw-flex tw-items-center tw-gap-2 tw-pl-3">
-                  
+               v-for="(file, index) in getFilesForMenu(menuItem.name)"
+               :class="[
+                  'flex tw-my-1 tw-cursor-pointer tw-flex-col tw-rounded-md tw-py-2 tw-transition-colors tw-duration-300 hover:tw-bg-blue-100',
+                  selectedFile == file ? 'tw-bg-blue-200' : 'tw-bg-blue-50',
+               ]">
+               <div
+                  @click.stop="selectFile(file)"
+                  class="tw-flex tw-items-center tw-gap-2 tw-pl-3">
                   <i
-                  class="pi pi-arrow-right tw-pt-1 tw-text-[10px] tw-font-light"></i>
+                     class="pi pi-arrow-right tw-pt-1 tw-text-[10px] tw-font-light"></i>
                   <span>
                      {{ file }}
                   </span>

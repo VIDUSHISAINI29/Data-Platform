@@ -1,12 +1,18 @@
 from fastapi import APIRouter
-from src.controllers.readFile import get_list_of_files, get_preview_of_file
+from src.controllers.readFile import get_list_of_raw_files, get_list_of_transformed_files, get_preview_of_file
 
 
 read_file_router = APIRouter()
 
-@read_file_router.get('/read-files')
-def read_endpoint():
-    files = get_list_of_files()
+@read_file_router.get('/read-raw-files-list')
+def read_raw_data_endpoint():
+    files = get_list_of_raw_files()
+    return files    
+
+
+@read_file_router.get('/read-transformed-files-list')
+def read_transformed_data_endpoint():
+    files = get_list_of_transformed_files()
     return files    
 
 # @read_file_router.get('/file-preview/{file_name}')

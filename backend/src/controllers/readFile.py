@@ -1,9 +1,18 @@
 from fastapi import HTTPException
-from src.services.readFile import list_files, get_file_preview
+from src.services.readFile import list_raw_files, list_transformed_files, get_file_preview 
 
-def get_list_of_files():
+def get_list_of_raw_files():
     try:
-        files_list = list_files()
+        files_list = list_raw_files()
+        return files_list
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    
+def get_list_of_transformed_files():
+    try:
+        files_list = list_transformed_files()
         return files_list
         
     except Exception as e:
