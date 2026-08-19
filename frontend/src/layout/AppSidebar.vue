@@ -61,9 +61,16 @@
 
    const getSelectedFilePreview = async () => {
       try {
-         let response = await axios.get(
-            `${VITE_BACKEND_URL}/reads/file-preview/${selectedFile.value}`,
-         );
+         if(route.path === '/raw-files'){
+            let response = await axios.get(
+            `${VITE_BACKEND_URL}/reads/raw-file-preview/${selectedFile.value}`,
+         )}
+         else{
+             let response = await axios.get(
+            `${VITE_BACKEND_URL}/reads/transformed-file-preview/${selectedFile.value}`,
+         )
+         
+         }
          fileStore.currentFile = response?.data;
          // console.log('res - ',response?.data)
          fileStore.currentFileName = selectedFile.value;
@@ -175,6 +182,27 @@
                   fileStore.rawFilesList &&
                   openMenu === 'Raw Files' &&
                   menuItem.name === 'Raw Files'
+               "
+               v-for="(file, index) in getFilesForMenu(menuItem.name)"
+               :class="[
+                  'flex tw-my-1 tw-cursor-pointer tw-flex-col tw-rounded-md tw-py-2 tw-transition-colors tw-duration-300 hover:tw-bg-blue-100',
+                  selectedFile == file ? 'tw-bg-blue-200' : 'tw-bg-blue-50',
+               ]">
+               <div
+                  @click.stop="selectFile(file)"
+                  class="tw-flex tw-items-center tw-gap-2 tw-pl-3">
+                  <i
+                     class="pi pi-arrow-right tw-pt-1 tw-text-[10px] tw-font-light"></i>
+                  <span>
+                     {{ file }}
+                  </span>
+               </div>
+            </div>
+            <div
+               v-if="
+                  fileStore.transformedFilesList &&
+                  openMenu === 'Transformed Files' &&
+                  menuItem.name === 'Transformed Files'
                "
                v-for="(file, index) in getFilesForMenu(menuItem.name)"
                :class="[

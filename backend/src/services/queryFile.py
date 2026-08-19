@@ -68,8 +68,10 @@ def execute_sql_query(
         # Only fetch rows needed for frontend preview
         df = result.limit(10).df()
 
-        return dataframe_to_preview(df)
-
+        return {
+            "message": "File transformed successfully",
+            "result": dataframe_to_preview(df)
+        }
     except Exception as e:
         raise HTTPException(
             status_code=400,

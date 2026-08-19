@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from src.controllers.readFile import get_list_of_raw_files, get_list_of_transformed_files, get_preview_of_file
+from src.controllers.readFile import get_list_of_raw_files, get_list_of_transformed_files, get_preview_of_raw_file, get_preview_of_transformed_file
 
 
 read_file_router = APIRouter()
@@ -21,12 +21,23 @@ def read_transformed_data_endpoint():
 #     print(file)
 #     return file    
 
-@read_file_router.get("/file-preview/{file_name}")
-async def preview_endpoint(
+@read_file_router.get("/raw-file-preview/{file_name}")
+async def raw_preview_endpoint(
     file_name: str,
     limit: int = 10
 ):
-    return await get_preview_of_file(
+    return await get_preview_of_raw_file(
+        file_name,
+        limit
+    )
+
+
+@read_file_router.get("/transformed-file-preview/{file_name}")
+async def transformed_preview_endpoint(
+    file_name: str,
+    limit: int = 10
+):
+    return await get_preview_of_transformed_file(
         file_name,
         limit
     )

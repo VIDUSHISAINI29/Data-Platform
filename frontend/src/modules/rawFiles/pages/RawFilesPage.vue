@@ -1,6 +1,6 @@
 <script setup lang="ts">
    import { ref, onMounted, computed } from 'vue';
-   import { getRawFilesList } from '../api/rawFiles.api';
+   import { getRawFilesList, queryFile, TransformFile } from '../api/rawFiles.api';
    import { useFileStore } from '@/shared/store/fileStore';
    import axios from 'axios';
 
@@ -12,7 +12,10 @@
       LIMIT 2
    `);
    const loadingQueryResult = ref(false);
+   const transformFileQueryResult = ref<string | null>(null)
+   const loadingTransformQueryResult = ref(false);
    const errorOfQuery = ref('');
+   const errorOfTransformQuery = ref('');
    const rows = computed(() => {
       return fileStore.currentFile?.data ?? [];
    });
@@ -60,22 +63,48 @@
       errorOfQuery.value = '';
 
       try {
-         const response = await axios.post(
-            `${VITE_BACKEND_URL}/query/query-file`,
-            {
-               file_name: fileStore.currentFileName,
-               query: query.value,
-            },
-         );
-
-         queryResult.value = response.data;
-         fileStore.currentFile = queryResult.value?.result;
-         console.log('query result - ', queryResult.value);
+         let queryFilePayload = {
+            file_name: fileStore.currentFileName,
+            query: query.value,
+         }
+         const response = await queryFile(queryFilePayload);
+         
+         queryResult.value = response?.result;
+         fileStore.currentFile = queryResult.value;
+         // console.log('query result - ', response?.result);
          // await getSelectedFilePreview();
       } catch (err: any) {
          errorOfQuery.value = err.response?.data?.detail || 'Failed to execute query';
       } finally {
          loadingQueryResult.value = false;
+      }
+   };
+
+   const transformUsingQuery = async () => {
+      if (!query.value.trim()) {
+         return;
+      }
+
+      loadingTransformQueryResult.value = true;
+      errorOfTransformQuery.value = '';
+
+      try {
+         let queryFilePayload = {
+            file_name: fileStore.currentFileName,
+            query: query.value,
+         }
+         const response = await TransformFile(queryFilePayload);
+         transformFileQueryResult.value = response?.message
+          queryResult.value = {
+            columns: [],
+            data: []
+          };
+         console.log('query result - ', response);
+         // await getSelectedFilePreview();
+      } catch (err: any) {
+         errorOfTransformQuery.value = err.response?.data?.detail || 'Failed to execute query';
+      } finally {
+         loadingTransformQueryResult.value = false;
       }
    };
 
@@ -127,8 +156,8 @@
                   label="Transform File"
                   icon="pi pi-bolt"
                   class="tw-border-blue-200 tw-text-blue-600 tw-bg-blue-200 "
-                  :loading="loadingQueryResult"
-                  @click="runQuery" />
+                  :loading="loadingTransformQueryResult"
+                  @click="transformUsingQuery" />
               </div>
             </div>
 
@@ -140,12 +169,15 @@
          </div>
 
          <!-- Error -->
-         <Message v-if="errorOfQuery" severity="error">
-            {{ errorOfQuery }}
+         <Message class="tw-my-1" v-if="errorOfQuery || errorOfTransformQuery" severity="error">
+            {{ errorOfQuery || errorOfTransformQuery}}
+         </Message>
+         <Message class="tw-my-1" v-if="transformFileQueryResult" severity="success">
+            {{ transformFileQueryResult}}
          </Message>
 
          <!-- Result -->
-         <div v-if="0" class="tw-overflow-x-auto"></div>
+         <div v-if="queryResult" class="tw-overflow-x-auto"></div>
          <div>
             <div class="w-full">
                <DataTable

@@ -8,7 +8,7 @@ from fastapi import HTTPException
 ROOT = Path(__file__).resolve().parent.parent
 
 DATA_DIR = ROOT / "data" / "raw" 
-TRANSFORMED_DATA_DIR = ROOT / "data" / "raw" 
+TRANSFORMED_DATA_DIR = ROOT / "data" / "transformed" 
 
 def list_raw_files():
     """Lists all supported data files in the folder."""
@@ -204,7 +204,7 @@ def get_json_preview(
 # Main File Preview
 # --------------------------------------------------
 
-def get_file_preview(
+def get_raw_file_preview(
     file_name: str,
     limit: int = 100
 ):
@@ -215,6 +215,86 @@ def get_file_preview(
     """
 
     file_path = DATA_DIR / file_name
+
+    # Check file exists
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="File not found"
+        )
+
+    if not file_path.is_file():
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid file"
+        )
+
+    extension = file_path.suffix.lower()
+
+    # ------------------------------
+    # Parquet
+    # ------------------------------
+
+    if extension == ".parquet":
+        return get_parquet_preview(
+            file_path,
+            limit
+        )
+
+    # ------------------------------
+    # CSV
+    # ------------------------------
+
+    elif extension == ".csv":
+        return get_csv_preview(
+            file_path,
+            limit
+        )
+
+    # ------------------------------
+    # Excel
+    # ------------------------------
+
+    elif extension in (".xlsx", ".xls"):
+        return get_excel_preview(
+            file_path,
+            limit
+        )
+
+    # ------------------------------
+    # JSON
+    # ------------------------------
+
+    elif extension == ".json":
+        return get_json_preview(
+            file_path,
+            limit
+        )
+
+    # ------------------------------
+    # Unsupported
+    # ------------------------------
+
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="Unsupported file format"
+        )
+
+
+
+
+def get_transformed_file_preview(
+    file_name: str,
+    limit: int = 100
+):
+    """
+    Returns a preview of the requested file.
+
+    The reader is selected based on the file extension.
+    """
+
+    file_path = TRANSFORMED_DATA_DIR / file_name
 
     # Check file exists
     if not file_path.exists():

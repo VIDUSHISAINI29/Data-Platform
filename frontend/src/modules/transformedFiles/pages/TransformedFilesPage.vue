@@ -1,6 +1,7 @@
 <script setup lang="ts">
    import { ref, onMounted, computed } from 'vue';
    import { useFileStore } from '@/shared/store/fileStore';
+   import {getTransformedFilesList} from "../api/transformedFiles.api"
    import axios from 'axios'
 
    const VITE_BACKEND_URL = import.meta.env.VITE_API_URL;
@@ -79,7 +80,29 @@ const runQuery = async () => {
   }
 }
 
-   onMounted(() => {
+const getTransformedFilesListFunction = async () => {
+      try {
+         let res = await getTransformedFilesList();
+         fileStore.transformedFilesList = res?.files;
+         console.log('files transformed list - ', res?.files);
+      } catch (error: any) {
+         if (error.response) {
+            console.error('Server Error Data:', error.response.data);
+            console.error('Server Status:', error.response.status);
+
+            console.log(
+               'error -',
+               error.response ||
+                  'Something went wrong while reading the raw files list.',
+            );
+         } else {
+            console.error('Read failed:', error.message);
+         }
+      }
+   };
+
+   onMounted(async() => {
+    await getTransformedFilesListFunction()
     console.log('row - ',fileStore.currentFile)
     console.log('col - ',columns)
    })
