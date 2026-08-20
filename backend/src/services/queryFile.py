@@ -120,7 +120,7 @@ def transform_file(
             f"""
             COPY data
             TO '{output_path}'
-            (FORMAT PARQUET)
+            (FORMAT XLSX, Header true)
             """
         )
 

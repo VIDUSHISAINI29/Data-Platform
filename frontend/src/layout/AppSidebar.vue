@@ -61,12 +61,13 @@
 
    const getSelectedFilePreview = async () => {
       try {
+         let response = null;
          if(route.path === '/raw-files'){
-            let response = await axios.get(
+            response = await axios.get(
             `${VITE_BACKEND_URL}/reads/raw-file-preview/${selectedFile.value}`,
          )}
          else{
-             let response = await axios.get(
+             response = await axios.get(
             `${VITE_BACKEND_URL}/reads/transformed-file-preview/${selectedFile.value}`,
          )
          
