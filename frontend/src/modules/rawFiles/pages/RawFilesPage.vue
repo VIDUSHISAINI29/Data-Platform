@@ -74,6 +74,7 @@
          // console.log('query result - ', response?.result);
          // await getSelectedFilePreview();
       } catch (err: any) {
+         console.log('err in querying raw file - ', err)
          errorOfQuery.value = err.response?.data?.detail || 'Failed to execute query';
       } finally {
          loadingQueryResult.value = false;

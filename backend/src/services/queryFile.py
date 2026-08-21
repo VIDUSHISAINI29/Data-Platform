@@ -37,7 +37,7 @@ def get_reader(file_path: Path):
     )
 
 
-def execute_sql_query(
+def execute_sql_query_for_raw_file(
     file_name: str,
     query: str
 ):
@@ -82,6 +82,55 @@ def execute_sql_query(
         connection.close()
 
 
+
+
+def execute_sql_query_for_transformed_file(
+    file_name: str,
+    query: str
+):
+    file_path = TRANSFORMED_DIR / file_name
+
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=404,
+            detail="File not found"
+        )
+
+    reader = get_reader(file_path)
+
+    connection = duckdb.connect()
+
+    try:
+        connection.execute(
+            f"""
+            CREATE TABLE data AS
+            SELECT *
+            FROM {reader}
+            """
+        )
+
+        # Execute query
+        result = connection.sql(query)
+
+        # Only fetch rows needed for frontend preview
+        df = result.limit(10).df()
+
+        return {
+            "message": "Transformed file queried successfully",
+            "result": dataframe_to_preview(df)
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Query failed: {str(e)}"
+        )
+
+    finally:
+        connection.close()
+
+
+
+
 def transform_file(
     file_name: str,
     query: str
@@ -98,7 +147,7 @@ def transform_file(
 
     output_path = (
         TRANSFORMED_DIR /
-        f"{file_path.stem}_transformed{file_path.suffix}"
+        f"{file_path.stem}_transformed.parquet"
     )
 
     connection = duckdb.connect()
@@ -120,7 +169,7 @@ def transform_file(
             f"""
             COPY data
             TO '{output_path}'
-            (FORMAT XLSX, Header true)
+            (FORMAT PARQUET)
             """
         )
 

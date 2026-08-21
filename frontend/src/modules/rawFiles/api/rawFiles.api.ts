@@ -5,12 +5,12 @@ export const getRawFilesList = async() => {
 }
 
 interface queryFilePayload {
-    file_name: string,
+    file_name: string|null,
     query: string
 }
 
 export const queryFile = async(payload: queryFilePayload) => {
-    return apiPost('/query/query-file', payload);
+    return apiPost('/query/query-raw-file', payload);
 }
 
 export const TransformFile = async(payload: queryFilePayload) => {

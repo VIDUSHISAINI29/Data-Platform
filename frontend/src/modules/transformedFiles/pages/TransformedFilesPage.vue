@@ -1,7 +1,7 @@
 <script setup lang="ts">
    import { ref, onMounted, computed } from 'vue';
    import { useFileStore } from '@/shared/store/fileStore';
-   import {getTransformedFilesList} from "../api/transformedFiles.api"
+   import {getTransformedFilesList, queryTransformedFile} from "../api/transformedFiles.api"
    import axios from 'axios'
 
    const VITE_BACKEND_URL = import.meta.env.VITE_API_URL;
@@ -15,7 +15,7 @@
 
 const getSelectedFilePreview = async() => {
       try {
-         let response = await axios.get(`${VITE_BACKEND_URL}/reads/file-preview/${fileStore.currentFileName}`);
+         let response = await axios.get(`${VITE_BACKEND_URL}/reads/transformed-file-preview/${fileStore.currentFileName}`);
          fileStore.currentFile = response?.data
          console.log('res - ',response?.data)
       } catch (error: any) {
@@ -58,22 +58,22 @@ const runQuery = async () => {
   error.value = ''
 
   try {
-    const response = await axios.post(
-      `${VITE_BACKEND_URL}/query/query-file`,
+    const response = await queryTransformedFile(
       {
         file_name: fileStore.currentFileName,
         query: query.value
       }
     )
 
-    queryResult.value = response.data
+    queryResult.value = response.result
     fileStore.currentFile = queryResult.value
-    console.log('query result - ', queryResult.value)
-     await getSelectedFilePreview()
+    console.log('query result - ', response.result)
+    //  await getSelectedFilePreview()
   } catch (err: any) {
     error.value =
       err.response?.data?.detail ||
       'Failed to execute query'
+         console.log('err in querying raw file - ', err)
 
   } finally {
     loading.value = false
@@ -89,6 +89,7 @@ const getTransformedFilesListFunction = async () => {
          if (error.response) {
             console.error('Server Error Data:', error.response.data);
             console.error('Server Status:', error.response.status);
+            console.error('Server Status:', error.response.status);
 
             console.log(
                'error -',
@@ -96,7 +97,7 @@ const getTransformedFilesListFunction = async () => {
                   'Something went wrong while reading the raw files list.',
             );
          } else {
-            console.error('Read failed:', error.message);
+            console.error('Read failed:', error);
          }
       }
    };
@@ -147,7 +148,7 @@ const getTransformedFilesListFunction = async () => {
 
     <!-- Result -->
     <div
-      v-if="0"
+      v-if="queryResult"
       class="tw-overflow-x-auto"
     ></div>
       <div>
