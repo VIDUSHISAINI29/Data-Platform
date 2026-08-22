@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 import os
+import traceback
 from pathlib import Path
 import io 
 import pandas as pd
@@ -62,17 +63,27 @@ def execute_sql_query_for_raw_file(
             """
         )
 
-        # Execute query
-        result = connection.sql(query)
+        query_type = query.strip().split()[0].upper()
 
-        # Only fetch rows needed for frontend preview
-        df = result.limit(10).df()
+        if query_type == "SELECT":
+
+            df = connection.sql(query).limit(10).df()
+
+        else:
+
+            connection.execute(query)
+
+            df = connection.sql(
+            "SELECT * FROM data LIMIT 10"
+            ).df()
 
         return {
             "message": "File transformed successfully",
             "result": dataframe_to_preview(df)
         }
     except Exception as e:
+        print("🔥 DUCKDB ERROR:", repr(e))
+        traceback.print_exc()
         raise HTTPException(
             status_code=400,
             detail=f"Query failed: {str(e)}"
